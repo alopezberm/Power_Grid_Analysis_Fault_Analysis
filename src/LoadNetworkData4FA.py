@@ -25,27 +25,25 @@ def LoadNetworkData4FA(filename):
         bus_fr, bus_to, id_, R, X, B, MVA_rate, X2, X0 = line #unpack
         ind_fr = bus_to_ind[bus_fr]    
         ind_to = bus_to_ind[bus_to] 
-        Z_se = 1j*X; Y_se = 1/Z_se
+        Z_se = 1j*X; Y_se = 1/Z_se #We will assume the line is purely inductive for this example, so R=0. If not, then Z_se = R + 1j*X.
         
         #Update the bus admittance matrix
-        Ybus[ind_fr,ind_fr]+= ''' Insert your code'''
-        Ybus[ind_to,ind_to]+= ''' Insert your code'''
-        Ybus[ind_fr,ind_to]+= ''' Insert your code'''
-        Ybus[ind_to,ind_fr]+= ''' Insert your code'''
+        Ybus[ind_fr,ind_fr]+= Y_se + 1j*B/2
+        Ybus[ind_to,ind_to]+= Y_se + 1j*B/2
+        Ybus[ind_fr,ind_to]+= -Y_se
+        Ybus[ind_to,ind_fr]+= -Y_se
         #negative sequence
-        Z2 = ''' Insert your code'''
-        Y2 = ''' Insert your code'''
-        Ybus2[ind_fr,ind_fr]+=''' Insert your code'''
-        Ybus2[ind_to,ind_to]+= ''' Insert your code''' 
-        Ybus2[ind_fr,ind_to]+= ''' Insert your code'''
-        Ybus2[ind_to,ind_fr]+= ''' Insert your code'''
+        Z2 = 1j*X2; Y2 = 1/Z2
+        Ybus2[ind_fr,ind_fr]+= Y2 + 1j*B/2
+        Ybus2[ind_to,ind_to]+= Y2 + 1j*B/2
+        Ybus2[ind_fr,ind_to]+= -Y2
+        Ybus2[ind_to,ind_fr]+= -Y2
         #zero sequence
-        Z0 = ''' Insert your code''' 
-        Y0 = ''' Insert your code'''
-        Ybus0[ind_fr,ind_fr]+= ''' Insert your code'''
-        Ybus0[ind_to,ind_to]+= ''' Insert your code'''
-        Ybus0[ind_fr,ind_to]+= ''' Insert your code'''
-        Ybus0[ind_to,ind_fr]+= ''' Insert your code'''
+        Z0 = 1j*X0; Y0 = 1/Z0
+        Ybus0[ind_fr,ind_fr]+= Y0 + 1j*B/2
+        Ybus0[ind_to,ind_to]+= Y0 + 1j*B/2
+        Ybus0[ind_fr,ind_to]+= -Y0
+        Ybus0[ind_to,ind_fr]+= -Y0
 
     # Add the transformer model to Ybus
     #bus_fr, bus_to, id_, R,X,n,ang1,fr_co, to_co, X2, X0 
@@ -58,20 +56,20 @@ def LoadNetworkData4FA(filename):
         #positive sequence
         Zeq = 1j*X; Yeq = 1/Zeq
         Yps_mat = np.zeros((2,2),dtype=complex)
-        Yps_mat[0,0] = ''' Insert your code'''  
-        Yps_mat[0,1] = ''' Insert your code'''
-        Yps_mat[1,0] = ''' Insert your code'''          
-        Yps_mat[1,1] = ''' Insert your code'''
+        Yps_mat[0,0] = Yeq   
+        Yps_mat[0,1] = -Yeq
+        Yps_mat[1,0] = -Yeq          
+        Yps_mat[1,1] = Yeq
         ind_ = np.array([ind_fr,ind_to])
         Ybus[np.ix_(ind_,ind_)] += Yps_mat
         
         #negative sequence
         Z2 = 1j*X2; Y2 = 1/Z2
         Yps_mat = np.zeros((2,2),dtype=complex)
-        Yps_mat[0,0] = ''' Insert your code''' 
-        Yps_mat[0,1] = ''' Insert your code'''
-        Yps_mat[1,0] = ''' Insert your code'''           
-        Yps_mat[1,1] =''' Insert your code'''
+        Yps_mat[0,0] = Y2   
+        Yps_mat[0,1] = -Y2
+        Yps_mat[1,0] = -Y2          
+        Yps_mat[1,1] = Y2
         ind_ = np.array([ind_fr,ind_to])
         Ybus2[np.ix_(ind_,ind_)] += Yps_mat
         
@@ -79,14 +77,14 @@ def LoadNetworkData4FA(filename):
         Z0 = 1j*X0; Y0 = 1/Z0
         Yps_mat = np.zeros((2,2),dtype=complex)
         if fr_co == 2 and to_co == 2:
-            Yps_mat[0,0] = ''' Insert your code'''
-            Yps_mat[0,1] = ''' Insert your code'''
-            Yps_mat[1,0] = ''' Insert your code''' 
-            Yps_mat[1,1] = ''' Insert your code'''
+            Yps_mat[0,0] = Y0
+            Yps_mat[0,1] = -Y0
+            Yps_mat[1,0] = -Y0           
+            Yps_mat[1,1] = Y0
         elif fr_co == 2 and to_co == 3:
-            Yps_mat[0,0] = ''' Insert your code'''
+            Yps_mat[0,0] = Y0
         elif fr_co == 3 and to_co == 2:
-            Yps_mat[1,1] = ''' Insert your code'''       
+            Yps_mat[1,1] = Y0     
         ind_ = np.array([ind_fr,ind_to])
         Ybus0[np.ix_(ind_,ind_)] += Yps_mat
         
@@ -128,15 +126,16 @@ def LoadNetworkData4FA(filename):
         Z = 1j*X*mva_base/MVA_size; 
         Y = 1/Z        
         #Update the bus admittance matrix
-        Ybus[ind_bus,ind_bus]+= ''' Insert your code'''
+        Ybus[ind_bus,ind_bus]+= Y
         #negative sequence
         Z2 = 1j*X2*mva_base/MVA_size; 
         Y2 = 1/Z2
-        Ybus2[ind_bus,ind_bus]+= ''' Insert your code'''
+        Ybus2[ind_bus,ind_bus]+= Y2
         #zero sequence
         Z0 = 1j*X0*mva_base/MVA_size 
         if ground:
-            Z0 += ''' Insert your code'''
+            # Multiplied by 3 because the physical neutral current is 3 times the zero-sequence current (In = 3*I0). This is because the zero-sequence current is defined as the current that flows in the neutral conductor, and in a three-phase system, the neutral current is equal to the sum of the currents in the three phases. Therefore, if we have a zero-sequence impedance Z0, the corresponding neutral impedance would be Z0/3, and the admittance would be 3/Z0. However, since we are adding this to the diagonal of Ybus0, we can directly add 3*Y0 to account for this effect.
+            Z0 += 3*1j*Xn*mva_base/MVA_size
         Y0 = 1/Z0
         Ybus0[ind_bus,ind_bus]+= Y0
    
