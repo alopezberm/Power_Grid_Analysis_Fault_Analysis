@@ -31,5 +31,4 @@ The main objectives (based on the course guidelines) include:
 │   └── A2_Group_15_46705.pdf     # The final report PDF for DTU-LEARN submission
 │
 ├── .gitignore                    # To ignore __pycache__, virtual environments, etc.
-├── requirements.txt              # Project dependencies (e.g., numpy, matplotlib)
 └── README.md                     # Project documentation
