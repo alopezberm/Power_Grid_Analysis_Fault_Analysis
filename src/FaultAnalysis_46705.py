@@ -28,30 +28,65 @@ def Calculate_Sequence_Fault_Currents(Zbus0,Zbus1,Zbus2,bus_to_ind,fault_bus,fau
     Iseq = np.zeros(3,dtype=complex)
     fb = bus_to_ind[fault_bus]
     if fault_type == 0:
-        ''' Insert your code'''
+        # 3-Phase balanced fault: Only positive sequence network is involved
+        Iseq[1] = Vf / (Zbus1[fb, fb] + Zf)
     elif fault_type == 1:
-        ''' Insert your code'''
+        # Single Line-to-Ground (SLG): Sequence networks connected in series
+        Iseq[0] = Vf / (Zbus0[fb, fb] + Zbus1[fb, fb] + Zbus2[fb, fb] + 3*Zf)
+        Iseq[1] = Iseq[0]
+        Iseq[2] = Iseq[0]        
     elif fault_type == 2:
-        ''' Insert your code'''
+        # Line-to-Line (LL): Positive and Negative networks connected in parallel (Zero sequence is 0)
+        Iseq[1] = Vf / (Zbus1[fb, fb] + Zbus2[fb, fb] + Zf)
+        Iseq[2] = -Iseq[1]
     elif fault_type == 3:
-        ''' Insert your code'''
+        # Double Line-to-Ground (DLG): All three sequence networks connected in parallel
+        Z0_eq = Zbus0[fb, fb] + 3*Zf
+        Iseq[1] = Vf / (Zbus1[fb, fb] + (Zbus2[fb, fb] * Z0_eq) / (Zbus2[fb, fb] + Z0_eq))
+        Iseq[2] = -Iseq[1] * Z0_eq / (Zbus2[fb, fb] + Z0_eq)
+        Iseq[0] = -Iseq[1] * Zbus2[fb, fb] / (Zbus2[fb, fb] + Z0_eq)
     else:
         print('Unknown Fault Type')
     return Iseq
 
 # 1.2 the Calculate_Sequence_Fault_Voltages() function
 def Calculate_Sequence_Fault_Voltages(Zbus0,Zbus1,Zbus2,bus_to_ind,fault_bus,Vf,Iseq):
-    ''' Insert your code'''
+    N = len(Zbus1) # Number of buses
+    Vseq_mat = np.zeros((N, 3), dtype=complex)
+    fb = bus_to_ind[fault_bus]
+    
+    # Calculate voltages for all buses using the Zbus matrices and injected fault currents
+    # Vseq_mat[:, 0] = Zero sequence, Vseq_mat[:, 1] = Positive sequence, Vseq_mat[:, 2] = Negative sequence
+    Vseq_mat[:, 0] = -Zbus0[:, fb] * Iseq[0]
+    Vseq_mat[:, 1] = Vf - Zbus1[:, fb] * Iseq[1]
+    Vseq_mat[:, 2] = -Zbus2[:, fb] * Iseq[2]
     return Vseq_mat
 
 # 1.3. the Convert_Sequence2Phase_Currents() function
 def Convert_Sequence2Phase_Currents(Iseq):
-    ''' Insert your code'''
+    # Fortescue Transformation Matrix (A)
+    a = np.exp(1j * 2 * np.pi / 3)
+    A_mat = np.array([[1, 1, 1], 
+                      [1, a**2, a], 
+                      [1, a, a**2]])
+    # Convert sequence currents to phase currents: Iph = A * Iseq
+    Iph = np.dot(A_mat, Iseq)
     return Iph
 
 # 1.4 the Convert_Sequence2Phase_Voltages() function
 def Convert_Sequence2Phase_Voltages(Vseq_mat):
-    ''' Insert your code'''
+    N = len(Vseq_mat)
+    Vph_mat = np.zeros((N, 3), dtype=complex)
+    
+    # Fortescue Transformation Matrix (A)
+    a = np.exp(1j * 2 * np.pi / 3)
+    A_mat = np.array([[1, 1, 1], 
+                      [1, a**2, a], 
+                      [1, a, a**2]])
+                      
+    # Apply transformation to every bus: Vph = A * Vseq
+    for i in range(N):
+        Vph_mat[i] = np.dot(A_mat, Vseq_mat[i])
     return Vph_mat
 
 # ####################################################
@@ -63,7 +98,28 @@ def DisplayFaultAnalysisResults(Iph,Vph_mat,fault_bus,fault_type,Zf,Vf):
     print('|                  Fault Analysis Results                    |')
     print('==============================================================')
 
-    ''' Insert your code'''
+    fault_names = {0: '3-Phase Balanced', 1: 'Single Line-to-Ground (SLG)', 2: 'Line-to-Line (LL)', 3: 'Double Line-to-Ground (DLG)'}
+    
+    print(f'Fault Type       : {fault_names.get(fault_type, "Unknown")}')
+    print(f'Faulted Bus      : {fault_bus}')
+    print(f'Fault Impedance  : {Zf} p.u.')
+    print(f'Prefault Voltage : {Vf} p.u.')
+    print('--------------------------------------------------------------')
+    
+    print('--> FAULT CURRENTS (Phase a, b, c) at the fault location:')
+    phases = ['a', 'b', 'c']
+    for i in range(3):
+        mag = np.abs(Iph[i])
+        ang = np.angle(Iph[i], deg=True)
+        print(f'    I_{phases[i]} = {mag:10.4f} p.u.  < {ang:7.2f}°')
+        
+    print('--------------------------------------------------------------')
+    print('--> BUS VOLTAGES (Phase a, b, c) for all nodes:')
+    print(' Bus Index |      Va (mag < deg)     |      Vb (mag < deg)     |      Vc (mag < deg)     ')
+    for idx, v_ph in enumerate(Vph_mat):
+        v_mags = np.abs(v_ph)
+        v_angs = np.angle(v_ph, deg=True)
+        print(f'    {idx:2d}     | {v_mags[0]:6.4f} < {v_angs[0]:7.2f}° | {v_mags[1]:6.4f} < {v_angs[1]:7.2f}° | {v_mags[2]:6.4f} < {v_angs[2]:7.2f}°')
     
     print('==============================================================')  
     return
