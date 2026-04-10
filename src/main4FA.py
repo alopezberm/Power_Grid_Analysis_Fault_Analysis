@@ -5,10 +5,10 @@ Main Script for Fault Analysis
 
 import FaultAnalysis_46705 as fa    # import Fault Analysis functions
 import LoadNetworkData4FA as lnd4fa # load the network data to global variables
-filename = "./TestSystem4FA.txt"
+filename = "./A_High_Loading_Operating_Point.txt" #"./TestSystem4FA.txt"
 lnd4fa.LoadNetworkData4FA(filename) # makes Zbus0 available as lndfa.Zbus0 etc.
 # Carry out the fault analysis ... 
-FaultBus = 3
+FaultBus = 5
 # FaultType: 0 = 3-phase balanced fault; 1 = Single Line-to-Ground fault;
 #            2 = Line-to-Line fault;     3 = Double Line-to-Ground fault.
 FaultType = 1

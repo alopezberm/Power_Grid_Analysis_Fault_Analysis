@@ -25,23 +25,26 @@ def LoadNetworkData4FA(filename):
         bus_fr, bus_to, id_, R, X, B, MVA_rate, X2, X0 = line #unpack
         ind_fr = bus_to_ind[bus_fr]    
         ind_to = bus_to_ind[bus_to] 
-        Z_se = 1j*X; Y_se = 1/Z_se #We will assume the line is purely inductive for this example, so R=0. If not, then Z_se = R + 1j*X.
-        
+
         #Update the bus admittance matrix
-        Ybus[ind_fr,ind_fr]+= Y_se + 1j*B/2
-        Ybus[ind_to,ind_to]+= Y_se + 1j*B/2
+        Z_se = R + 1j*X; Y_se = 1/Z_se 
+        Ybus[ind_fr,ind_fr]+= Y_se 
+        Ybus[ind_to,ind_to]+= Y_se
         Ybus[ind_fr,ind_to]+= -Y_se
         Ybus[ind_to,ind_fr]+= -Y_se
         #negative sequence
-        Z2 = 1j*X2; Y2 = 1/Z2
-        Ybus2[ind_fr,ind_fr]+= Y2 + 1j*B/2
-        Ybus2[ind_to,ind_to]+= Y2 + 1j*B/2
+        Z2 = R + 1j*X2; Y2 = 1/Z2
+        Ybus2[ind_fr,ind_fr]+= Y2
+        Ybus2[ind_to,ind_to]+= Y2
         Ybus2[ind_fr,ind_to]+= -Y2
         Ybus2[ind_to,ind_fr]+= -Y2
         #zero sequence
-        Z0 = 1j*X0; Y0 = 1/Z0
-        Ybus0[ind_fr,ind_fr]+= Y0 + 1j*B/2
-        Ybus0[ind_to,ind_to]+= Y0 + 1j*B/2
+        # NOTE: Since the provided input file format lacks an R0 column, 
+        # R0 is calculated based on the specific cable parameters provided in Table 1 
+        # (z0_real / z1_real = 0.2 / 0.08 = 2.5).
+        Z0 = (R * 2.5) + 1j*X0; Y0 = 1/Z0
+        Ybus0[ind_fr,ind_fr]+= Y0
+        Ybus0[ind_to,ind_to]+= Y0
         Ybus0[ind_fr,ind_to]+= -Y0
         Ybus0[ind_to,ind_fr]+= -Y0
 

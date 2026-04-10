@@ -94,32 +94,34 @@ def Convert_Sequence2Phase_Voltages(Vseq_mat):
 # ####################################################
 # 2. the DisplayFaultAnalysisResults() function
 def DisplayFaultAnalysisResults(Iph,Vph_mat,fault_bus,fault_type,Zf,Vf):
-    print('==============================================================')
-    print('|                  Fault Analysis Results                    |')
-    print('==============================================================')
+    print('='*88)
+    print('|' + 'Fault Analysis Results'.center(86) + '|')
+    print('='*88)
 
-    fault_names = {0: '3-Phase Balanced', 1: 'Single Line-to-Ground (SLG)', 2: 'Line-to-Line (LL)', 3: 'Double Line-to-Ground (DLG)'}
+    fault_names = {0: '3-phase balanced fault', 1: 'Single Line-to-Ground fault', 2: 'Line-to-Line fault', 3: 'Double Line-to-Ground fault'}
     
-    print(f'Fault Type       : {fault_names.get(fault_type, "Unknown")}')
-    print(f'Faulted Bus      : {fault_bus}')
-    print(f'Fault Impedance  : {Zf} p.u.')
-    print(f'Prefault Voltage : {Vf} p.u.')
-    print('--------------------------------------------------------------')
+    print('|' + f' Fault Type         :  {fault_names.get(fault_type, "Unknown")}'.ljust(86) + '|')
+    print('|' + f' Faulted Bus        :  {fault_bus}'.ljust(86) + '|')
+    print('|' + f' Fault Impedance    :  {Zf} pu'.ljust(86) + '|')
+    print('|' + f' Prefault Voltage   :  {Vf} pu'.ljust(86) + '|')
+    print('='*88)
     
-    print('--> FAULT CURRENTS (Phase a, b, c) at the fault location:')
+    print('|' + ' --> FAULT CURRENTS (Phase a, b, c) at the fault location:'.ljust(86) + '|')
     phases = ['a', 'b', 'c']
     for i in range(3):
         mag = np.abs(Iph[i])
         ang = np.angle(Iph[i], deg=True)
-        print(f'    I_{phases[i]} = {mag:10.4f} p.u.  < {ang:7.2f}°')
+        print('|' + f'     I_{phases[i]} = {mag:10.4f} pu   < {ang:7.2f} deg'.ljust(86) + '|')
         
-    print('--------------------------------------------------------------')
-    print('--> BUS VOLTAGES (Phase a, b, c) for all nodes:')
-    print(' Bus Index |      Va (mag < deg)     |      Vb (mag < deg)     |      Vc (mag < deg)     ')
+    print('|' + '-'*86 + '|')
+    print('|' + ' --> BUS VOLTAGES (Phase a, b, c) for all nodes:'.ljust(86) + '|')
+    s_header = '  Bus Index |     Va (mag < deg)     |     Vb (mag < deg)     |     Vc (mag < deg)'
+    print('|' + s_header.ljust(86) + '|')
     for idx, v_ph in enumerate(Vph_mat):
         v_mags = np.abs(v_ph)
         v_angs = np.angle(v_ph, deg=True)
-        print(f'    {idx:2d}     | {v_mags[0]:6.4f} < {v_angs[0]:7.2f}° | {v_mags[1]:6.4f} < {v_angs[1]:7.2f}° | {v_mags[2]:6.4f} < {v_angs[2]:7.2f}°')
+        s_row = f'      {idx+1:<6d}|  {v_mags[0]:6.4f} < {v_angs[0]:7.2f} deg  |  {v_mags[1]:6.4f} < {v_angs[1]:7.2f} deg  |  {v_mags[2]:6.4f} < {v_angs[2]:7.2f} deg'
+        print('|' + s_row.ljust(86) + '|')
     
-    print('==============================================================')  
+    print('='*88)
     return
