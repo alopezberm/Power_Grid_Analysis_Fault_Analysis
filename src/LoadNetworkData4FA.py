@@ -147,4 +147,3 @@ def LoadNetworkData4FA(filename):
     Zbus2 = np.linalg.inv(Ybus2)
     
     return
-    
