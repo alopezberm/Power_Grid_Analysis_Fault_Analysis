@@ -5,10 +5,32 @@ Main Script for Fault Analysis
 
 import FaultAnalysis_46705 as fa    # import Fault Analysis functions
 import LoadNetworkData4FA as lnd4fa # load the network data to global variables
+<<<<<<< Updated upstream
 filename = "./A_High_Loading_Operating_Point.txt" #"./TestSystem4FA.txt"
 lnd4fa.LoadNetworkData4FA(filename) # makes Zbus0 available as lndfa.Zbus0 etc.
 # Carry out the fault analysis ... 
 FaultBus = 5
+=======
+
+#Import this one when does task 13 Restiance scenario
+#import LoadNetworkData4FATask13 as lnd4fa # load the network data with grounding modifications to global variables
+
+
+
+#filename = "src\\A_High_Loading_Operating_Point.txt" #"./TestSystem4FA.txt"
+filename = "src\\TestSystem4FA.txt"
+
+#filename = "src\\TestSystem4FA_solidground1.txt" # for task 13 scenario 1
+#filename = "src\\TestSystem4FA_Resistance_Grounding2.txt" # for task 13 scenario 2
+#filename = "src\\TestSystem4FA_Reactance_Grounding3.txt" # for task 13 scenario 3
+#filename = "src\\TestSystem4FA_ygygytransformer4.txt" # for task 13 scenario 4
+#filename = "src\\TestSystem4FA_deltadeltatransformer5.txt" # for task 13 scenario 5
+
+
+lnd4fa.LoadNetworkData4FA(filename) # makes Zbus0 available as lndfa.Zbus0 etc.
+# Carry out the fault analysis ... 
+FaultBus = 4
+>>>>>>> Stashed changes
 # FaultType: 0 = 3-phase balanced fault; 1 = Single Line-to-Ground fault;
 #            2 = Line-to-Line fault;     3 = Double Line-to-Ground fault.
 FaultType = 0
